@@ -1,0 +1,52 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.6-SNAPSHOT'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.sashkomusic'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '23'
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.spring.io/snapshot' }
+}
+
+ext {
+	set('springAiVersion', "1.0.0")
+	set('springCloudVersion', "2025.0.0")
+	set('springFunctionsCatalogVersion', "5.1.0")
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.cloud:spring-cloud-function-context'
+	implementation 'org.springframework.cloud.fn:spring-file-supplier'
+
+	implementation 'org.springframework.ai:spring-ai-tika-document-reader'
+	implementation 'org.springframework.ai:spring-ai-starter-model-anthropic'
+	implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
+	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+
+	implementation("org.apache.pdfbox:pdfbox:3.0.4")
+
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		mavenBom "org.springframework.cloud.fn:spring-functions-catalog-bom:${springFunctionsCatalogVersion}"
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
