@@ -15,7 +15,7 @@ import static com.sashkomusic.dataloader.reader.utils.PDFUtils.splitPdfIntoChunk
 @Component
 public class AiDocumentReader implements DocumentReader {
     private static final int DOCUMENT_HEADER_PAGE_NUMBER_DELIMITER = 2;
-    private static final int PAGES_PER_CHUNK = 2;
+    private static final int PAGES_PER_CHUNK = 1;
 
     private final AiParser aiParser;
 
@@ -26,7 +26,6 @@ public class AiDocumentReader implements DocumentReader {
     @Override
     public List<Document> read(Resource resource) {
         List<Resource> splitPdf = PDFUtils.splitPdf(resource, DOCUMENT_HEADER_PAGE_NUMBER_DELIMITER);
-
         Map<String, Object> generalMetadata = aiParser.askGeneralMetadata(splitPdf.getFirst());
 
         List<Document> docs = new ArrayList<>();

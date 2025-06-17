@@ -49,33 +49,6 @@ public class SMusicDataLoaderApplication {
         return args -> composedFunction.run();
     }
 
-  /*  @Bean
-    Function<Message<byte[]>, Message<byte[]>> preAnalyzer() {
-        return bytes -> {
-            //byte[] data = bytes.getPayload();
-            MessageHeaders headers = bytes.getHeaders();
-
-            // define strategy here
-            *//*
-     * 1) ai_ua reader,
-     * 2) tika_en reader
-     *
-     * 2) reader thing....
-     * but with pdf we should split first... but we can do that in reader step... to read by batches.
-     * Then combine together into one big text....
-     * BASICALLY ONLY READER IS DIFFERENT.... default or if ai in prefix then AI...
-     *
-     * 3) After it pass to do splitter thing
-     * 4) translator thing....define what language is used or take just from file....and generate new docs
-     * 5) then metadata thing for each doc with AI..... ukraine or english....
-     * *//*
-
-            //ByteArrayResource resource = new ByteArrayResource(message.getPayload());
-
-            return bytes;
-        };
-    }*/
-
     @Bean
     Function<Message<byte[]>, Message<byte[]>> readerResolver() {
         return message -> {
