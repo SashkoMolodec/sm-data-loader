@@ -1,6 +1,5 @@
 package com.sashkomusic.dataloader;
 
-import com.sashkomusic.dataloader.reader.utils.AiParser;
 import com.sashkomusic.dataloader.reader.DocumentReader;
 import com.sashkomusic.dataloader.reader.DocumentReaderFactory;
 import com.sashkomusic.dataloader.reader.ReaderType;
@@ -26,16 +25,13 @@ import static com.sashkomusic.dataloader.reader.ReaderType.DEFAULT;
 @SpringBootApplication
 public class SMusicDataLoaderApplication {
 
-    private final AiParser aiParser;
-
     private final DocumentReaderFactory documentReaderFactory;
 
     private DocumentReader documentReader;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SMusicDataLoaderApplication.class);
 
-    public SMusicDataLoaderApplication(AiParser aiParser, DocumentReaderFactory documentReaderFactory) {
-        this.aiParser = aiParser;
+    public SMusicDataLoaderApplication(DocumentReaderFactory documentReaderFactory) {
         this.documentReaderFactory = documentReaderFactory;
     }
 
