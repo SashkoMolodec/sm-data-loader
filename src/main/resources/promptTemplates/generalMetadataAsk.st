@@ -19,12 +19,12 @@ INSTRUCTIONS:
 OUTPUT FORMAT:
 Provide a JSON object with relevant metadata fields. Example:
 {{
-    "years": ["2019", "2020"],
-    "geography": ["Country1", "City1"],
-    "publication_type": ["catalog"],
-    "publication_information": ["catalog"],
-    "target_audience": ["Reference1"],
-    "historical_context": ["Brief historical context"]
+    "doc_years": ["2019", "2020"],
+    "doc_geography": ["Country1", "City1"],
+    "doc_publication_type": ["catalog"],
+    "doc_publication_information": ["catalog"],
+    "doc_target_audience": ["Reference1"],
+    "doc_historical_context": ["Brief historical context"]
   }}
 
 Include only fields that can be confidently determined from the document. If a field cannot be determined, omit it entirely rather than guessing. Remember to keep all metadata GENERAL, not specific to individual artists or works.

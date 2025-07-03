@@ -41,45 +41,22 @@ Visual Elements Analysis:
     - Cultural/historical significance
 
 METADATA EXTRACTION:
-Extract ALL relevant metadata including:
-
-- Artists/bands/musicians
-- Albums/EPs/singles
-- Song titles
-- Music genres
-- Years (release dates, performance dates)
-- Geographic locations
-- Record labels
-- Musical context (reviews, interviews, news, etc.)
-- Instruments mentioned
-- Performances/concerts
-- Critics/reviewers
-- Ratings/scores if applicable
-- Related artists
-- Cultural references
-- Historical context
+1. Extract ALL relevant metadata, use this categories:
+{tagCategories}
+2. Format the output as a clean JSON object with appropriate key-value pairs. If there are no values for a key, do not include it in response.
 
 OUTPUT FORMAT:
-
+1. Provide a JSON object with relevant metadata fields.
+2. Use only double quotes.
+3. Each value next to key in metadata should be list.
+An example (use metadata keys from categories mentioned before):
 {{
   "text": "Exact translated text",
   "metadata": {{
     "artists": ["Artist1", "Artist2"],
     "albums": ["Album1", "Album2"],
-    "songs": ["Song1", "Song2"],
-    "genres": ["Genre1", "Genre2"],
-    "years": ["2019", "2020"],
-    "geography": ["Country1", "City1"],
-    "labels": ["Label1"],
-    "context_type": ["review", "interview"],
-    "instruments": ["Instrument1", "Instrument2"],
-    "performances": ["Performance1"],
-    "critics": ["Critic1"],
-    "related_artists": ["RelatedArtist1"],
-    "cultural_references": ["Reference1"],
-    "historical_context": ["Brief historical context"],
-    "technology": ["analog recording", "early digital production"]
-  }}
+    "years": ["2019", "2020"]
+    }}
 }}
 
 IMPORTANT NOTES:

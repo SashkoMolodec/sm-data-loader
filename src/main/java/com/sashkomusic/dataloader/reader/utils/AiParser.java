@@ -3,6 +3,7 @@ package com.sashkomusic.dataloader.reader.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sashkomusic.dataloader.SMusicDataLoaderApplication;
+import com.sashkomusic.dataloader.model.enums.TagCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.anthropic.AnthropicChatModel;
@@ -18,6 +19,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeType;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -83,25 +86,30 @@ public class AiParser {
     }
 
     public Document analyzePdf(Resource resource) {
-        UserMessage message = UserMessage.builder()
+        var prompt = PromptTemplate.builder()
+                .resource(parsePdfPrompt)
+                .variables(Map.of("tagCategories", TagCategory.getDocumentTagOptionsString()))
+                .build().create();
+
+        var withMedia = UserMessage.builder()
                 .media(new Media(new MimeType("application", "pdf"), resource))
-                .text(parseTextPrompt)
+                .text(prompt.getContents())
                 .build();
 
         var response = chatClient
-                .prompt(new Prompt(message))
+                .prompt(new Prompt(withMedia))
                 .system(systemPrompt)
                 .call()
                 .entity(ResponseDocument.class);
 
         LOG.info("Extracted text from resource using AI parser");
-        return new Document(response.text(), response.metadata());
+        return buildDocs(response);
     }
 
     public Document analyzeText(String text) {
         var prompt = PromptTemplate.builder()
                 .resource(parseTextPrompt)
-                .variables(Map.of("text", text))
+                .variables(Map.of("text", text, "tagCategories", TagCategory.getDocumentTagOptionsString()))
                 .build().create();
 
         var response = chatClient
@@ -110,7 +118,20 @@ public class AiParser {
                 .call()
                 .entity(ResponseDocument.class);
 
-        return new Document(response.text(), response.metadata());
+        return buildDocs(response);
+    }
+
+    private Document buildDocs(ResponseDocument response) {
+        //validateTagCategories(response);
+        return new Document(response.text(), new HashMap<>(response.metadata()));
+    }
+
+    private static void validateTagCategories(ResponseDocument response) {
+        response.metadata().forEach((key, el) -> {
+            if (TagCategory.findByName(key) == null) {
+                throw new RuntimeException();
+            }
+        });
     }
 
     public String prepareStringForJson(String input) {
@@ -126,5 +147,5 @@ public class AiParser {
     }
 }
 
-record ResponseDocument(String text, Map<String, Object> metadata) {
+record ResponseDocument(String text, Map<String, List<String>> metadata) {
 }
