@@ -34,6 +34,10 @@ dependencies {
 
 	implementation("org.apache.pdfbox:pdfbox:3.0.4")
 
+	// Spring Retry (annotation-based retries) and AOP proxy support
+	implementation 'org.springframework.retry:spring-retry'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

@@ -1,9 +1,7 @@
 package com.sashkomusic.dataloader.reader.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sashkomusic.dataloader.SMusicDataLoaderApplication;
-import com.sashkomusic.dataloader.model.enums.TagCategory;
+import com.sashkomusic.dataloader.service.TagService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.anthropic.AnthropicChatModel;
@@ -35,15 +33,17 @@ public class AiParser {
     Resource generalMetadataPrompt;
 
     @Value("classpath:/promptTemplates/parseTextChunk.st")
-    Resource parseTextPrompt;
+    Resource parseTextChunkPrompt;
 
     @Value("classpath:/promptTemplates/parsePdfChunk.st")
     Resource parsePdfPrompt;
 
     private final ChatClient chatClient;
+    private final TagService tagService;
 
-    public AiParser(AnthropicChatModel chatModel) {
+    public AiParser(AnthropicChatModel chatModel, TagService tagService) {
         this.chatClient = ChatClient.create(chatModel);
+        this.tagService = tagService;
     }
 
     public Map<String, Object> askGeneralMetadata(Resource resource) {
@@ -88,7 +88,7 @@ public class AiParser {
     public Document analyzePdf(Resource resource) {
         var prompt = PromptTemplate.builder()
                 .resource(parsePdfPrompt)
-                .variables(Map.of("tagCategories", TagCategory.getDocumentTagOptionsString()))
+                .variables(Map.of("tagCategories", tagService.getDocumentTagOptionsString()))
                 .build().create();
 
         var withMedia = UserMessage.builder()
@@ -108,8 +108,8 @@ public class AiParser {
 
     public Document analyzeText(String text) {
         var prompt = PromptTemplate.builder()
-                .resource(parseTextPrompt)
-                .variables(Map.of("text", text, "tagCategories", TagCategory.getDocumentTagOptionsString()))
+                .resource(parseTextChunkPrompt)
+                .variables(Map.of("text", text, "tagCategories", tagService.getDocumentTagOptionsString()))
                 .build().create();
 
         var response = chatClient
@@ -122,28 +122,7 @@ public class AiParser {
     }
 
     private Document buildDocs(ResponseDocument response) {
-        //validateTagCategories(response);
         return new Document(response.text(), new HashMap<>(response.metadata()));
-    }
-
-    private static void validateTagCategories(ResponseDocument response) {
-        response.metadata().forEach((key, el) -> {
-            if (TagCategory.findByName(key) == null) {
-                throw new RuntimeException();
-            }
-        });
-    }
-
-    public String prepareStringForJson(String input) {
-        if (input == null) {
-            return null;
-        }
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(input);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to escape JSON string", e);
-        }
     }
 }
 

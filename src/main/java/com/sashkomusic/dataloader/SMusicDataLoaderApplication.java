@@ -3,6 +3,7 @@ package com.sashkomusic.dataloader;
 import com.sashkomusic.dataloader.reader.DocumentReader;
 import com.sashkomusic.dataloader.reader.DocumentReaderFactory;
 import com.sashkomusic.dataloader.reader.ReaderType;
+import com.sashkomusic.dataloader.service.TagService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
@@ -10,6 +11,7 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ByteArrayResource;
@@ -23,16 +25,19 @@ import static com.sashkomusic.dataloader.reader.ReaderType.AI;
 import static com.sashkomusic.dataloader.reader.ReaderType.DEFAULT;
 
 @SpringBootApplication
+@EnableRetry
 public class SMusicDataLoaderApplication {
 
     private final DocumentReaderFactory documentReaderFactory;
 
     private DocumentReader documentReader;
+    private TagService tagService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SMusicDataLoaderApplication.class);
 
-    public SMusicDataLoaderApplication(DocumentReaderFactory documentReaderFactory) {
+    public SMusicDataLoaderApplication(DocumentReaderFactory documentReaderFactory, TagService tagService) {
         this.documentReaderFactory = documentReaderFactory;
+        this.tagService = tagService;
     }
 
     public static void main(String[] args) {
@@ -48,10 +53,10 @@ public class SMusicDataLoaderApplication {
     @Bean
     Function<Message<byte[]>, Message<byte[]>> readerResolver() {
         return message -> {
-            String contentType = message.getHeaders().get("file_name").toString();
+            String fileName = message.getHeaders().get("file_name").toString();
 
             ReaderType readerType = DEFAULT;
-            if (contentType.contains("_AI")) {
+            if (fileName.contains("_AI")) {
                 readerType = AI;
             }
             setDocumentReader(documentReaderFactory.get(readerType));
@@ -65,6 +70,16 @@ public class SMusicDataLoaderApplication {
         return message -> {
             ByteArrayResource resource = new ByteArrayResource(message.getPayload());
             return documentReader.read(resource);
+        };
+    }
+
+    @Bean
+    Function<List<Document>, List<Document>> tagExtractors() {
+        LOGGER.info("Extracting unique tags and saving to DB.");
+
+        return documents -> {
+            tagService.createTags(documents);
+            return documents;
         };
     }
 
